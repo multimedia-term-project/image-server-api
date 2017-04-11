@@ -26,25 +26,29 @@ module.exports = function (app) {
       });
     });
   });
-
+  // Handles POST /user/signin
   app.post("/user/signin", function(req, res){
 
+    // Finds user document with same email
     user.findOne({email: req.body.email}).then(function(user, err) {
 
+      // Checks if it was able to connect to db
       if (err) {
         res.status(500).send(err);
       }
 
+      // Checks that it found a user
       if (user == null) {
         res.status(404).send("email does not exist");
       }
 
+      // Checks if found user's password and sent in password match
       if (user.password == req.body.password) {
         res.json(user);
       } else {
         res.status(401).send("Incorect password");
       }
-      
+
     });
   });
 
