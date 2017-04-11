@@ -26,4 +26,26 @@ module.exports = function (app) {
       });
     });
   });
+
+  app.post("/user/signin", function(req, res){
+
+    user.findOne({email: req.body.email}).then(function(user, err) {
+
+      if (err) {
+        res.status(500).send(err);
+      }
+
+      if (user == null) {
+        res.status(404).send("email does not exist");
+      }
+
+      if (user.password == req.body.password) {
+        res.json(user);
+      } else {
+        res.status(401).send("Incorect password");
+      }
+      
+    });
+  });
+
 }
