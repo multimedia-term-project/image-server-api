@@ -6,7 +6,6 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var cors = require('cors');
-
 var index = require('./routes/index');
 
 var app = express();
@@ -17,7 +16,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
 // Connect to MongoDB here
-//EX: mongoose.connect('mongodb://52.14.32.168');
+mongoose.connect('mongodb://192.168.99.100:32768');
 port = 3000;
 
 // uncomment after placing your favicon in /public
@@ -31,8 +30,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', index);
 
 // Require the needed routes for each project component
-// EX: require('./routes/user/users.js')(app);
-
+require('./routes/user/user.js')(app);
+require('./routes/image/image.js')(app);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
