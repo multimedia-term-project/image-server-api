@@ -1,7 +1,7 @@
 var aws = require('aws-sdk');
 var shortid = require('shortid');
 var multer  = require('multer');
-
+var exif = require('exif').ExifImage
 var image = require('./image.schema.js');
 
 aws.config.loadFromPath('./config.json');
@@ -21,14 +21,27 @@ module.exports = function(app) {
       if (err) {
         res.status(500).send(err)
       }
-      image.create({
-          url : "https://s3.us-east-2.amazonaws.com/multimedia-term-project/" + fileName,
-          userId : req.param.userId
-      }).then(function (image, err) {
+
+      exif({image: req.files[0].buffer}, function (err, data) {
           if (err) {
-            res.status(500).send(err);
+              res.status(500).send(err);
+              return;
           }
-          res.json(image)
+
+          image.create({
+              url: "https://s3.us-east-2.amazonaws.com/multimedia-term-project/" + fileName,
+              userId: req.param.userId,
+              created : Date(data.exif.CreateDate),
+              location : {
+                  longitude : data.gps.longitude,
+                  latitude : data.gps.latitude
+              }
+          }, function (err, image) {
+              if (err) {
+                res.status(500).send(err);
+              }
+              res.json(image)
+        });
       });
     });
   });
