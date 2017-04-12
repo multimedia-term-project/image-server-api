@@ -1,6 +1,8 @@
 var aws = require('aws-sdk');
 var shortid = require('shortid');
-var multer  = require('multer')
+var multer  = require('multer');
+
+var image = require('./image.schema.js');
 
 aws.config.loadFromPath('./config.json');
 var s3 = new aws.S3();
@@ -19,9 +21,25 @@ module.exports = function(app) {
       if (err) {
         res.status(500).send(err)
       }
-      res.json({
-          url : "https://s3.us-east-2.amazonaws.com/multimedia-term-project/" + fileName
+      image.create({
+          url : "https://s3.us-east-2.amazonaws.com/multimedia-term-project/" + fileName,
+          userId : req.param.userId
+      }).then(function (image, err) {
+          if (err) {
+            res.status(500).send(err);
+          }
+          res.json(image)
       });
     });
+  });
+
+  app.get('/image/:userId', function (req, res) {
+      image.find({'userId': req.param.userId}).then(function (images, err) {
+          if (err) {
+            res.status(500).send(err);
+          }
+
+          res.json(images);
+      });
   });
 }
