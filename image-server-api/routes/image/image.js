@@ -30,6 +30,7 @@ module.exports = function(app) {
 
           image.create({
               url: "https://s3.us-east-2.amazonaws.com/multimedia-term-project/" + fileName,
+              name : fileName,
               userId: req.param.userId,
               created : Date(data.exif.CreateDate),
               location : {
@@ -47,7 +48,7 @@ module.exports = function(app) {
   });
 
   app.get('/image/:userId', function (req, res) {
-      image.find({'userId': req.param.userId}).then(function (images, err) {
+      image.find({'userId': req.param.userId}, function (err, images) {
           if (err) {
             res.status(500).send(err);
           }
@@ -55,4 +56,29 @@ module.exports = function(app) {
           res.json(images);
       });
   });
+
+  app.delete('/image/:imageId', function (req, res) {
+      image.findById(req.params.imageId, function (err, image_){
+          if (err) {
+              res.status(500).send(err);
+          }
+          var params = {
+              Bucket : "multimedia-term-project",
+              Key : image_.name
+          };
+          s3.deleteObject(params, function (err, data) {
+              if (err) {
+                  res.status(500).send(err);
+              }
+              image.deleteOne({_id: req.params.imageId}, function (err, data) {
+                  if (err) {
+                      res.status(500).send(err);
+                  }
+                  res.send("Object was Successfully Deleted!")
+              })
+          });
+      });
+  });
+
+
 }
