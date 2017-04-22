@@ -23,26 +23,34 @@ module.exports = function(app) {
       }
 
       exif({image: req.files[0].buffer}, function (err, data) {
-          if (err) {
-              res.status(500).send(err);
-              return;
+          if (!data) {
+              image.create({
+                  url: "https://s3.us-east-2.amazonaws.com/multimedia-term-project/" + fileName,
+                  name : fileName,
+                  userId: req.param.userId
+              }, function (err, image) {
+                  if (err) {
+                    res.status(500).send(err);
+                  }
+                  res.json(image)
+            });
+          } else {
+              image.create({
+                  url: "https://s3.us-east-2.amazonaws.com/multimedia-term-project/" + fileName,
+                  name: fileName,
+                  userId: req.param.userId,
+                  created: Date(data.exif.CreateDate),
+                  location: {
+                      longitude: data.gps.longitude,
+                      latitude: data.gps.latitude
+                  }
+              }, function (err, image) {
+                  if (err) {
+                      res.status(500).send(err);
+                  }
+                  res.json(image)
+              });
           }
-
-          image.create({
-              url: "https://s3.us-east-2.amazonaws.com/multimedia-term-project/" + fileName,
-              name : fileName,
-              userId: req.param.userId,
-              created : Date(data.exif.CreateDate),
-              location : {
-                  longitude : data.gps.longitude,
-                  latitude : data.gps.latitude
-              }
-          }, function (err, image) {
-              if (err) {
-                res.status(500).send(err);
-              }
-              res.json(image)
-        });
       });
     });
   });
