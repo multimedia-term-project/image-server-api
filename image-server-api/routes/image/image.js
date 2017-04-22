@@ -4,7 +4,7 @@ var multer  = require('multer');
 var exif = require('exif').ExifImage
 var image = require('./image.schema.js');
 
-aws.config.loadFromPath('./config.json');
+aws.config.loadFromPath('./aws.config.json');
 var s3 = new aws.S3();
 
 module.exports = function(app) {
