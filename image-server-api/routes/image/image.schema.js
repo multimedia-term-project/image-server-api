@@ -2,5 +2,11 @@ const mongoose = require('mongoose');
 
 module.exports = mongoose.model('image',{
     url : String,
-    userId : String
+    name : String,
+    userId : String,
+    created : Date,
+    gps : {
+        longitude : Number,
+        latitude : Number
+    }
 });
