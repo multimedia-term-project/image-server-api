@@ -16,7 +16,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
 // Connect to MongoDB here
-mongoose.connect('mongodb://13.58.44.82');
+mongoose.connect('mongodb://mongo');
 port = 3000;
 
 // uncomment after placing your favicon in /public

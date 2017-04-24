@@ -49,7 +49,7 @@ module.exports = function(app) {
                   res.json(image)
               });
           }
-          amqp.connect('amqp://192.168.99.100:32769', function (err, conn) {
+          amqp.connect('amqp://rabbitmq', function (err, conn) {
               conn.createChannel(function (err, ch) {
                   var message = Buffer.from(JSON.stringify(imageBody));
                   var queue = 'images';
