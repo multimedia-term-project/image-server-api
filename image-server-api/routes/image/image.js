@@ -2,6 +2,7 @@ var aws = require('aws-sdk');
 var shortid = require('shortid');
 var multer  = require('multer');
 var exif = require('exif').ExifImage
+var amqp = require('amqplib/callback_api');
 var image = require('./image.schema.js');
 
 aws.config.loadFromPath('./aws.config.json');
@@ -23,34 +24,40 @@ module.exports = function(app) {
       }
 
       exif({image: req.files[0].buffer}, function (err, data) {
+          var imageBody = {
+              url: "https://s3.us-east-2.amazonaws.com/multimedia-term-project/" + fileName,
+              name: fileName,
+              userId: req.param.userId
+          }
           if (!data) {
-              image.create({
-                  url: "https://s3.us-east-2.amazonaws.com/multimedia-term-project/" + fileName,
-                  name : fileName,
-                  userId: req.param.userId
-              }, function (err, image) {
+              image.create(imageBody, function (err, image) {
                   if (err) {
-                    res.status(500).send(err);
+                      res.status(500).send(err);
                   }
                   res.json(image)
-            });
+              });
           } else {
-              image.create({
-                  url: "https://s3.us-east-2.amazonaws.com/multimedia-term-project/" + fileName,
-                  name: fileName,
-                  userId: req.param.userId,
-                  created: Date(data.exif.CreateDate),
-                  location: {
-                      longitude: data.gps.longitude,
-                      latitude: data.gps.latitude
-                  }
-              }, function (err, image) {
+              imageBody.location = {
+                  longitude: data.gps.longitude,
+                  latitude: data.gps.latitude
+              };
+              imageBody.created = Date(data.exif.CreateDate);
+              image.create(imageBody, function (err, image) {
                   if (err) {
                       res.status(500).send(err);
                   }
                   res.json(image)
               });
           }
+          amqp.connect('amqp://192.168.99.100:32769', function (err, conn) {
+              conn.createChannel(function (err, ch) {
+                  var message = Buffer.from(JSON.stringify(imageBody));
+                  var queue = 'images';
+                  ch.assertQueue(queue, {durable: true});
+                  ch.sendToQueue(queue, message);
+                  console.log(" [x] Sent %s", imageBody.name);
+              });
+          });
       });
     });
   });
@@ -60,7 +67,6 @@ module.exports = function(app) {
           if (err) {
             res.status(500).send(err);
           }
-
           res.json(images);
       });
   });
@@ -82,11 +88,9 @@ module.exports = function(app) {
                   if (err) {
                       res.status(500).send(err);
                   }
-                  res.send("Object was Successfully Deleted!")
+                  res.send("Object was Successfully Deleted!");
               })
           });
       });
   });
-
-
 }
