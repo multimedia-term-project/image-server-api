@@ -53,7 +53,7 @@ module.exports = function(app) {
               conn.createChannel(function (err, ch) {
                   var message = Buffer.from(JSON.stringify(imageBody));
                   var queue = 'images';
-                  ch.assertQueue(queue, {durable: true});
+                  ch.assertQueue(queue);
                   ch.sendToQueue(queue, message);
                   console.log(" [x] Sent %s", imageBody.name);
               });
