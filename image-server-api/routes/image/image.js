@@ -27,7 +27,7 @@ module.exports = function(app) {
           var imageBody = {
               url: "https://s3.us-east-2.amazonaws.com/multimedia-term-project/" + fileName,
               name: fileName,
-              userId: req.param.userId
+              userId: req.param("userId")
           }
           if (!data) {
               image.create(imageBody, function (err, image) {
@@ -63,7 +63,7 @@ module.exports = function(app) {
   });
 
   app.get('/image/:userId', function (req, res) {
-      image.find({'userId': req.param.userId}, function (err, images) {
+      image.find({'userId': req.param("userId")}, function (err, images) {
           if (err) {
             res.status(500).send(err);
           }
@@ -72,7 +72,7 @@ module.exports = function(app) {
   });
 
   app.delete('/image/:imageId', function (req, res) {
-      image.findById(req.params.imageId, function (err, image_){
+      image.findById(req.param("imageId"), function (err, image_){
           if (err) {
               res.status(500).send(err);
           }
@@ -84,7 +84,7 @@ module.exports = function(app) {
               if (err) {
                   res.status(500).send(err);
               }
-              image.deleteOne({_id: req.params.imageId}, function (err, data) {
+              image.deleteOne({_id: req.param("imageId")}, function (err, data) {
                   if (err) {
                       res.status(500).send(err);
                   }
